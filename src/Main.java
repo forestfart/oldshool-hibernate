@@ -4,7 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -17,6 +19,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		Main main = new Main();
+		main.addNewData();
 		main.printSchools();
 		//main.printClasses();
 		main.close();
@@ -55,6 +58,39 @@ public class Main {
 		for (SchoolClass s : classes) {
 			System.out.println(s);
 		}
+	}
+	
+	private void addNewData() {
+		
+		School newSchool = new School();
+		newSchool.setName("UJ");
+		newSchool.setAddress("Go³êbia 24");
+		
+		SchoolClass newSchoolClass = new SchoolClass();
+		newSchoolClass.setProfile("Biochemistry");
+		newSchoolClass.setStartYear(2001);
+		newSchoolClass.setCurrentYear(2018);
+		
+		Set<SchoolClass> newSchoolClassSet = new HashSet<>();
+		newSchoolClassSet.add(newSchoolClass);
+		
+		Student newStudent = new Student();
+		newStudent.setName("Anonymous");
+		newStudent.setSurname("Anonymous");
+		newStudent.setPesel("84215512255");
+		
+		Set<Student> newStudentsSet = new HashSet<>();
+		newStudentsSet.add(newStudent);
+		
+		newSchoolClass.setStudents(newStudentsSet);
+		newSchool.setClasses(newSchoolClassSet);;
+		
+		
+
+		Transaction transaction = session.beginTransaction();
+		session.save(newSchool); // gdzie newSchool to instancja nowej szko³y
+		transaction.commit();
+
 	}
 
 	private void jdbcTest() {
