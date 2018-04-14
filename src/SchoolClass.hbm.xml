@@ -15,7 +15,15 @@
 			<key column="class_id" />
 			<one-to-many class="Student" />
 		</set>
-		
+
+		<set name="teachers" table="teachers_classes" inverse="false" lazy="true" fetch="select" cascade="all">
+			<key>
+				<column name="class_id" not-null="true"/>
+			</key>
+			<many-to-many entity-name="Teacher">
+				<column name="teacher_id" not-null="true"></column>
+			</many-to-many>
+		</set>
 
 	</class>
 </hibernate-mapping>

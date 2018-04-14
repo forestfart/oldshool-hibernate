@@ -1,13 +1,23 @@
+import java.io.Serializable;
 import java.util.Set;
 
-public class SchoolClass implements java.io.Serializable {
+public class SchoolClass implements Serializable {
 
 	private long id;
 	private int startYear;
 	private int currentYear;
 	private String profile;
 	private Set<Student> students;
-	
+	private Set<Teacher> teacher;
+
+	public Set<Teacher> getTeachers() {
+		return teacher;
+	}
+
+	public void setTeachers(Set<Teacher> teachers) {
+		this.teacher = teachers;
+	}
+
 	public Set<Student> getStudents() {
 		return students;
 	}

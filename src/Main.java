@@ -1,11 +1,12 @@
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 
 import org.hibernate.Criteria;
@@ -19,10 +20,100 @@ public class Main {
 
 	public static void main(String[] args) {
 		Main main = new Main();
-		main.addNewData();
-		main.printSchools();
+		//main.addNewData();
+		//main.printSchools();
 		//main.printClasses();
+		main.executeQueries();
+		main.countSchoolsInDb();
+		main.countStudents();
+		main.printSchoolsWithMoreThanTwoClasses();
+		main.printSchoolWithSelectedProfileeClass();
+		main.updateSchoolAddressById(2);
+		main.addTeacher();
 		main.close();
+	}
+
+	private void addTeacher() {
+		Teacher newTeacher = new Teacher();
+		Scanner in = new Scanner(System.in);
+		System.out.print("Please type in teacher's name: ");
+		newTeacher.setName(in.nextLine());
+		System.out.print("Please type in teacher's subject(s): ");
+		newTeacher.setSubject(in.nextLine());
+		printClasses();
+		System.out.print("Please select id teacher's class: ");
+
+		Query query = session.createQuery("from SchoolClass where id= :id");
+		query.setLong("id", in.nextInt());
+		SchoolClass fetchedSchoolClass = (SchoolClass) query.uniqueResult();
+
+		Set<SchoolClass> newTeacherClasses = new HashSet<>();
+		newTeacherClasses.add(fetchedSchoolClass);
+
+		newTeacher.setClasses(newTeacherClasses);
+
+		Transaction transaction = session.beginTransaction();
+		session.save(newTeacher);
+		transaction.commit();
+	}
+
+	private void updateSchoolAddressById(long searchValue) {
+		Query query = session.createQuery("from School where id= :id");
+		query.setLong("id", searchValue);
+		School school = (School) query.uniqueResult();
+		System.out.printf("Schools with ID:%o name: %s addres: %s\n", searchValue, school.getName(), school.getAddress());
+		Scanner in = new Scanner(System.in);
+		System.out.printf("Please type in the new address of %s: ", school.getName());
+		school.setAddress(in.nextLine());
+		Transaction transaction = session.beginTransaction();
+		session.save(school);
+		transaction.commit();
+		System.out.printf("School updated ID:%o name: %s addres: %s\n", searchValue, school.getName(), school.getAddress());
+
+	}
+
+	private void printSchoolWithSelectedProfileeClass() {
+		String hql ="SELECT s FROM School s INNER JOIN s.classes classes WHERE classes.profile = 'mat-fiz' AND classes.currentYear >= 2";
+		Query query = session.createQuery(hql);
+		List result = query.list();
+		System.out.printf("Schools with mat-fiz: %s\n", result);
+	}
+
+	private void printSchoolsWithMoreThanTwoClasses() {
+		String hql ="SELECT s FROM School s INNER JOIN s.classes classes GROUP BY s HAVING COUNT(classes.id) >= 2";
+		Query query = session.createQuery(hql);
+		List result = query.list();
+		System.out.printf("Number of schools with more than two classes: %s\n", result);
+}
+
+	private void countStudents() {
+		String hql = "SELECT COUNT(*) FROM Student";
+		Query query = session.createQuery(hql);
+		Object result = query.uniqueResult();
+		System.out.printf("Number of students in the database: %s\n", result);
+	}
+
+	private void countSchoolsInDb() {
+		String hql = "SELECT COUNT(*) FROM School";
+		Query query = session.createQuery(hql);
+		Object result = query.uniqueResult();
+		System.out.printf("Number of schools in the database: %s\n", result);
+	}
+
+	private void executeQueries() {
+		String hql = "FROM School WHERE name='UE'";
+		Query query = session.createQuery(hql);
+		List results = query.list();
+		System.out.println(results);
+		// delete transaction
+		int counter = 0;
+		Transaction transaction = session.beginTransaction();
+		for (Object result : results) {
+			session.delete(result);
+			counter++;
+		}
+		transaction.commit();
+		System.out.printf("%d elements deleted %s\n", counter, hql.toLowerCase());
 	}
 
 	public Main() {
@@ -56,7 +147,7 @@ public class Main {
 
 		System.out.println("### Classes");
 		for (SchoolClass s : classes) {
-			System.out.println(s);
+			System.out.printf("%d %s\n", s.getId(), s);
 		}
 	}
 	
@@ -64,7 +155,7 @@ public class Main {
 		
 		School newSchool = new School();
 		newSchool.setName("UJ");
-		newSchool.setAddress("Go³êbia 24");
+		newSchool.setAddress("Goï¿½ï¿½bia 24");
 		
 		SchoolClass newSchoolClass = new SchoolClass();
 		newSchoolClass.setProfile("Biochemistry");
@@ -88,7 +179,7 @@ public class Main {
 		
 
 		Transaction transaction = session.beginTransaction();
-		session.save(newSchool); // gdzie newSchool to instancja nowej szko³y
+		session.save(newSchool); // gdzie newSchool to instancja nowej szkoly
 		transaction.commit();
 
 	}
